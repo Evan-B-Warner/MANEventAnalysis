@@ -4,10 +4,6 @@ from DBConnector import DBConnector
 from db_utils import fetch_match_event_data
 from pass_utils import classify_pass
 
-# default dimensions for the pitch
-PITCH_HEIGHT = 105
-PITCH_WIDTH = 68
-# Note: pitch_x is the field length, pitch_y is the field width
 
 
 def closest_coords(timestamp, coords):
@@ -22,6 +18,12 @@ def closest_coords(timestamp, coords):
             else:
                 return coords[i-1]
     return coords[-1]
+
+
+def time_format(seconds):
+    mins = int(seconds//60)
+    seconds = int(seconds - mins*60)
+    return f"{mins}:{str(seconds).zfill(2)}"
             
 
 def analyze_events(events, bboxes):
@@ -33,7 +35,7 @@ def analyze_events(events, bboxes):
             passer_coords = closest_coords(event["start_time"]+1, bboxes[event["participants"]["passer"]])
             receiver_coords = closest_coords(event["end_time"]-1, bboxes[event["participants"]["receiver"]])
             tags = classify_pass(event, passer_coords["x"], passer_coords["y"], receiver_coords["x"], receiver_coords["y"])
-            analyzed.append([event_id, tags])
+            analyzed.append([time_format(event["start_time"]) + "-" + time_format(event["end_time"]), tags])
 
     import json
     with open("analyzed_events.json", "w") as f:
