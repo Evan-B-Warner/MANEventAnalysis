@@ -94,3 +94,8 @@ def fetch_match_event_data(db_conn, match_id):
     # fetch and format player bboxes
     formatted_bboxes = fetch_and_format_player_bboxes(db_conn, match_id)
     return formatted_events, formatted_bboxes
+
+
+def write_tags_to_db(db_conn, events):
+    for event in events:
+        db_conn.execute("UPDATE events SET tags = %s WHERE event_id = %s", (", ".join(event["tags"]), event["event_id"],))

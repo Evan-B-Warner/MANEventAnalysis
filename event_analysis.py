@@ -1,7 +1,7 @@
 import os
 
 from DBConnector import DBConnector
-from db_utils import fetch_match_event_data
+from db_utils import fetch_match_event_data, write_tags_to_db
 from pass_utils import classify_pass
 
 
@@ -35,11 +35,9 @@ def analyze_events(events, bboxes):
             passer_coords = closest_coords(event["start_time"]+1, bboxes[event["participants"]["passer"]])
             receiver_coords = closest_coords(event["end_time"]-1, bboxes[event["participants"]["receiver"]])
             tags = classify_pass(event, passer_coords["x"], passer_coords["y"], receiver_coords["x"], receiver_coords["y"])
-            analyzed.append([time_format(event["start_time"]) + "-" + time_format(event["end_time"]), tags])
+            analyzed.append({"event_id": event_id, "tags": tags})
 
-    import json
-    with open("analyzed_events.json", "w") as f:
-        json.dump({"events": analyzed}, f, indent=4)
+    return analyzed
 
 
 if __name__ == "__main__":
@@ -53,5 +51,6 @@ if __name__ == "__main__":
     # fetch data
     events, bboxes = fetch_match_event_data(db_conn, 4)
 
-    # analyze events
-    analyze_events(events, bboxes)
+    # analyze and write events
+    analyzed = analyze_events(events, bboxes)
+    write_tags_to_db(db_conn, analyzed)
