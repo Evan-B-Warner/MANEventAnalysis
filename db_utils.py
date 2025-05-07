@@ -59,17 +59,20 @@ def format_events_and_participants(events, participants):
 
 def fetch_and_format_player_bboxes(db_conn, match_id):
     # fetch bboxes
+    # IMPORTANT: team 0 corresponds to attacking right, 1 is attacking left
     query = (
     """
     SELECT
-        tracker_id,
-        pitch_x,
-        pitch_y,
-        timestamp
+        po.team,
+        pob.tracker_id,
+        pob.pitch_x,
+        pob.pitch_y,
+        pob.timestamp
     FROM
-        player_overlay_bboxes
+        player_overlay_bboxes pob LEFT JOIN
+        player_overlays po ON (pob.tracker_id = po.tracker_id AND pob.match_id = po.match_id)
     WHERE
-        match_id = %s
+        pob.match_id = %s
     """)
     bboxes = db_conn.execute_and_read(query, (match_id,))
 
@@ -79,7 +82,7 @@ def fetch_and_format_player_bboxes(db_conn, match_id):
         tracker_id = bbox["tracker_id"]
         if tracker_id not in formatted_bboxes:
             formatted_bboxes[tracker_id] = []
-        formatted_bboxes[tracker_id].append({"timestamp": bbox["timestamp"], "x": bbox["pitch_x"], "y": bbox["pitch_y"]})
+        formatted_bboxes[tracker_id].append({"timestamp": bbox["timestamp"], "x": bbox["pitch_x"], "y": bbox["pitch_y"], "team": bbox["team"]})
     return formatted_bboxes
 
 

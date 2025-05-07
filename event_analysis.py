@@ -5,7 +5,6 @@ from db_utils import fetch_match_event_data, write_tags_to_db
 from pass_utils import classify_pass
 
 
-
 def closest_coords(timestamp, coords):
     # finds the player coordinates at the closest time to the timestamp
     prev = None
@@ -34,7 +33,7 @@ def analyze_events(events, bboxes):
         if event_type == "pass":
             passer_coords = closest_coords(event["start_time"]+1, bboxes[event["participants"]["passer"]])
             receiver_coords = closest_coords(event["end_time"]-1, bboxes[event["participants"]["receiver"]])
-            tags = classify_pass(event, passer_coords["x"], passer_coords["y"], receiver_coords["x"], receiver_coords["y"])
+            tags = classify_pass(event, event_id, passer_coords["team"], receiver_coords["team"], passer_coords["x"], passer_coords["y"], receiver_coords["x"], receiver_coords["y"])
             analyzed.append({"event_id": event_id, "tags": tags})
 
     return analyzed
