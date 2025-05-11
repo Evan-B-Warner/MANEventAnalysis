@@ -4,9 +4,12 @@ from DBConnector import DBConnector
 from common_utils import closest_coords
 from db_utils import fetch_match_event_data, write_tags_to_db
 from pass_utils import classify_pass
-            
+from assist_utils import classify_assists
+
 
 def analyze_events(events, bboxes):
+    assists = classify_assists(events, bboxes)
+
     analyzed = []
     for event_id in events:
         event = events[event_id]
