@@ -1,28 +1,9 @@
 import os
 
 from DBConnector import DBConnector
+from common_utils import closest_coords
 from db_utils import fetch_match_event_data, write_tags_to_db
 from pass_utils import classify_pass
-
-
-def closest_coords(timestamp, coords):
-    # finds the player coordinates at the closest time to the timestamp
-    prev = None
-    for i in range(len(coords)):
-        coord = coords[i]
-        current = coord["timestamp"]
-        if current > timestamp:
-            if prev is None or abs(current - timestamp) <= abs(prev - timestamp):
-                return coord
-            else:
-                return coords[i-1]
-    return coords[-1]
-
-
-def time_format(seconds):
-    mins = int(seconds//60)
-    seconds = int(seconds - mins*60)
-    return f"{mins}:{str(seconds).zfill(2)}"
             
 
 def analyze_events(events, bboxes):
