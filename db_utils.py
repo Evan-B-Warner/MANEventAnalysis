@@ -100,5 +100,5 @@ def fetch_match_event_data(db_conn, match_id):
 
 
 def write_tags_to_db(db_conn, events):
-    for event in events:
-        db_conn.execute("UPDATE events SET tags = %s WHERE event_id = %s", (", ".join(event["tags"]), event["event_id"],))
+    for event_id in events:
+        db_conn.execute("UPDATE events SET tags = %s WHERE event_id = %s", (", ".join(events[event_id]), event_id,))

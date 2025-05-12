@@ -31,7 +31,7 @@ def is_final_third_pass(passer_team, receiver_team, passer_x, receiver_x):
             (passer_team == 0 and receiver_team == 0) # at least one member is attacking right
         ) or 
         (
-            (passer_x >= 0.33 and receiver_x < 0.33) # pass into "left" final third
+            (passer_x >= 0.33 and receiver_x < 0.33) and # pass into "left" final third
             (passer_team == 1 and receiver_team == 1) # at least one member is attacking left
         )
     )

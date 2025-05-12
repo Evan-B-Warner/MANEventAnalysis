@@ -13,19 +13,21 @@ def classify_assists(events, bboxes):
         "second_assists": [],
         "third_assists": [],
     }
-    for i in range(len(events)):
-        if events[i]["result"] == "goal":
+    for event_id in events:
+        event = events[event_id]
+        if event["type"] == "shot":
+            is_goal = event["result"] == "goal"
             # check the three previous pass events, stopping on possession loss, for assists
-            scoring_team = check_team(events[i], events[i]["participants"]["shooter"], bboxes)
+            scoring_team = check_team(event, event["participants"]["shooter"], bboxes)
             pass_counter = 0
             assist_counter = 0
             while True:
                 pass_counter += 1
-                index = i - pass_counter
-                current_event = events[index]
+                index = event_id - pass_counter
                 # check for out of bounds
-                if index < 0:
+                if index not in events < 0:
                     break
+                current_event = events[index]
                 # check for loss of possession
                 if (
                     current_event["type"] in ["shot", "infraction", "clearance"] or # these events cause possession loss
@@ -47,15 +49,18 @@ def classify_assists(events, bboxes):
                 if current_event["type"] == "pass":
                     assister = current_event["participants"]["passer"]
                     if assist_counter == 0:
-                        assists["assists"].append(assister)
+                        if is_goal:
+                            assists["assists"].append({"event_id": index, "assister": assister})
+                        else:
+                            assists["shot_assists"].append({"event_id": index, "assister": assister})
                     elif assist_counter == 1:
-                        assists["second_assists"].append(assister)
+                        assists["second_assists"].append({"event_id": index, "assister": assister})
                     elif assist_counter == 2:
-                        assists["third_assists"].append(assister)
+                        assists["third_assists"].append({"event_id": index, "assister": assister})
                     assist_counter += 1
 
-                # break if we have already found all three assists
-                if assist_counter == 3:
+                # break if we have already found all three assists or one assist for just a shot
+                if assist_counter == 3 or (assist_counter == 1 and not is_goal):
                     break
     return assists
                 

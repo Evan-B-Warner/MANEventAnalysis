@@ -8,9 +8,8 @@ from assist_utils import classify_assists
 
 
 def analyze_events(events, bboxes):
-    assists = classify_assists(events, bboxes)
-
-    analyzed = []
+    # passes
+    analyzed = {}
     for event_id in events:
         event = events[event_id]
         event_type = event["type"]
@@ -18,7 +17,16 @@ def analyze_events(events, bboxes):
             passer_coords = closest_coords(event["start_time"]+1, bboxes[event["participants"]["passer"]])
             receiver_coords = closest_coords(event["end_time"]-1, bboxes[event["participants"]["receiver"]])
             tags = classify_pass(event, event_id, passer_coords["team"], receiver_coords["team"], passer_coords["x"], passer_coords["y"], receiver_coords["x"], receiver_coords["y"])
-            analyzed.append({"event_id": event_id, "tags": tags})
+            analyzed["event_id"] = tags[:]
+    
+    # assists
+    assists = classify_assists(events, bboxes)
+    for assist_type in assists:
+        for assist in assists[assist_type]:
+            event_id = assist["event_id"]
+            if event_id not in analyzed:
+                analyzed[event_id] = []
+            analyzed[assist["event_id"]].append(assist_type)
 
     return analyzed
 
