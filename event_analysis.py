@@ -5,6 +5,8 @@ from common_utils import closest_coords
 from db_utils import fetch_match_event_data, write_tags_to_db
 from pass_utils import classify_pass
 from assist_utils import classify_assists
+from shot_utils import classify_shot
+from duel_utils import classify_duel
 
 
 def analyze_events(events, bboxes):
@@ -13,11 +15,24 @@ def analyze_events(events, bboxes):
     for event_id in events:
         event = events[event_id]
         event_type = event["type"]
+
+        # passes
         if event_type == "pass":
             passer_coords = closest_coords(event["start_time"]+1, bboxes[event["participants"]["passer"]])
             receiver_coords = closest_coords(event["end_time"]-1, bboxes[event["participants"]["receiver"]])
             tags = classify_pass(event, event_id, passer_coords["team"], receiver_coords["team"], passer_coords["x"], passer_coords["y"], receiver_coords["x"], receiver_coords["y"])
-            analyzed["event_id"] = tags[:]
+       
+        # shots
+        elif event_type == "shot":
+            tags = classify_shot(event)
+        
+        # duels
+        elif event_type == "duel":
+            tags = classify_duel(event)
+        
+        # save the tags
+        analyzed["event_id"] = tags[:]
+        
     
     # assists
     assists = classify_assists(events, bboxes)
