@@ -7,6 +7,7 @@ from pass_utils import classify_pass
 from assist_utils import classify_assists
 from shot_utils import classify_shot
 from duel_utils import classify_duel
+from carry_utils import classify_carry
 
 
 def analyze_events(events, bboxes):
@@ -15,12 +16,13 @@ def analyze_events(events, bboxes):
     for event_id in events:
         event = events[event_id]
         event_type = event["type"]
+        tags = []
 
         # passes
         if event_type == "pass":
             passer_coords = closest_coords(event["start_time"]+1, bboxes[event["participants"]["passer"]])
             receiver_coords = closest_coords(event["end_time"]-1, bboxes[event["participants"]["receiver"]])
-            tags = classify_pass(event, event_id, passer_coords["team"], receiver_coords["team"], passer_coords["x"], passer_coords["y"], receiver_coords["x"], receiver_coords["y"])
+            tags = classify_pass(event, passer_coords["team"], receiver_coords["team"], passer_coords["x"], passer_coords["y"], receiver_coords["x"], receiver_coords["y"])
        
         # shots
         elif event_type == "shot":
@@ -30,10 +32,15 @@ def analyze_events(events, bboxes):
         elif event_type == "duel":
             tags = classify_duel(event)
         
+        # carries
+        elif event_type == "carry":
+            start_coords = closest_coords(event["start_time"]+1, bboxes[event["participants"]["carrier"]])
+            end_coords = closest_coords(event["end_time"]-1, bboxes[event["participants"]["carrier"]])
+            tags = classify_carry(event, start_coords["team"], start_coords["x"], start_coords["y"], end_coords["x"], end_coords["y"])
+
         # save the tags
-        analyzed["event_id"] = tags[:]
+        analyzed[event_id] = tags[:]
         
-    
     # assists
     assists = classify_assists(events, bboxes)
     for assist_type in assists:
