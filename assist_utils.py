@@ -1,9 +1,5 @@
 
-from common_utils import closest_coords
-
-
-def check_team(event, tracker_id, bboxes):
-    return closest_coords(event["start_time"], bboxes[tracker_id])["team"]
+from common_utils import closest_coords, check_team
 
 
 def classify_assists(events, bboxes):

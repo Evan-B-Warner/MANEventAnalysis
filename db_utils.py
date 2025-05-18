@@ -88,7 +88,9 @@ def fetch_and_format_player_bboxes(db_conn, match_id):
 
 def fetch_match_event_data(db_conn, match_id):
     # fetch events and participants
+    print("Fetching Event Data...")
     events = fetch_events(db_conn, match_id)
+    print("Fetching Participant Data...")
     participants = fetch_event_participants(db_conn, match_id)
 
     # format events and participants to index by event id
@@ -100,5 +102,6 @@ def fetch_match_event_data(db_conn, match_id):
 
 
 def write_tags_to_db(db_conn, events):
+    print("Writing Tags to DB...")
     for event_id in events:
         db_conn.execute("UPDATE events SET tags = %s WHERE event_id = %s", (", ".join(events[event_id]), event_id,))

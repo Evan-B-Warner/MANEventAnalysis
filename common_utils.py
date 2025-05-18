@@ -5,6 +5,13 @@ PITCH_LENGTH = 105
 PITCH_WIDTH = 68
 # Note: pitch_x is the field length, pitch_y is the field width
 
+def check_team(event, tracker_id, bboxes):
+    # return -1 if dummy player
+    if tracker_id not in bboxes:
+        return -1
+    return closest_coords(event["start_time"], bboxes[tracker_id])["team"]
+
+
 def cartesian_distance(x1, y1, x2, y2):
     x1 *= PITCH_LENGTH
     x2 *= PITCH_LENGTH

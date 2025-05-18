@@ -1,4 +1,5 @@
 import os
+from tqdm import tqdm
 
 from DBConnector import DBConnector
 from common_utils import closest_coords
@@ -8,12 +9,14 @@ from assist_utils import classify_assists
 from shot_utils import classify_shot
 from duel_utils import classify_duel
 from carry_utils import classify_carry
+from losses_and_recovery_utils import classify_losses_and_interceptions, classify_recoveries
+from infraction_utils import classify_infraction
 
 
 def analyze_events(events, bboxes):
-    # passes
+    print("Analyzing Events...")
     analyzed = {}
-    for event_id in events:
+    for event_id in tqdm(events):
         event = events[event_id]
         event_type = event["type"]
         tags = []
@@ -38,9 +41,17 @@ def analyze_events(events, bboxes):
             end_coords = closest_coords(event["end_time"]-1, bboxes[event["participants"]["carrier"]])
             tags = classify_carry(event, start_coords["team"], start_coords["x"], start_coords["y"], end_coords["x"], end_coords["y"])
 
+        # infractions
+        elif event_type == "infraction":
+            tags = classify_infraction(event)
+
+        # losses and interceptions
+        tags.extend(classify_losses_and_interceptions(event, bboxes))
+
         # save the tags
         analyzed[event_id] = tags[:]
-        
+    
+    print("Classifying Assists and Recoveries...")
     # assists
     assists = classify_assists(events, bboxes)
     for assist_type in assists:
@@ -49,6 +60,13 @@ def analyze_events(events, bboxes):
             if event_id not in analyzed:
                 analyzed[event_id] = []
             analyzed[assist["event_id"]].append(assist_type)
+    
+    # recoveries
+    recoveries = classify_recoveries(events, bboxes)
+    for event_id in recoveries:
+        if event_id not in analyzed:
+            analyzed[event_id] = []
+        analyzed[event_id].append(recoveries[event_id])
 
     return analyzed
 
