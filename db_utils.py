@@ -52,7 +52,7 @@ def format_events_and_participants(events, participants):
             "result": event["result"],
             "start_time": event["start_time"],
             "end_time": event["end_time"],
-            "participants": formatted_participants[event_id],
+            "participants": formatted_participants.get(event_id, []),
         }
     return formatted_events
 

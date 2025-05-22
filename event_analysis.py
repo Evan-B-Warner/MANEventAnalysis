@@ -23,9 +23,12 @@ def analyze_events(events, bboxes):
 
         # passes
         if event_type == "pass":
-            passer_coords = closest_coords(event["start_time"]+1, bboxes[event["participants"]["passer"]])
-            receiver_coords = closest_coords(event["end_time"]-1, bboxes[event["participants"]["receiver"]])
-            tags = classify_pass(event, passer_coords["team"], receiver_coords["team"], passer_coords["x"], passer_coords["y"], receiver_coords["x"], receiver_coords["y"])
+            passer_id, receiver_id = event["participants"]["passer"], event["participants"]["receiver"]
+            if passer_id not in bboxes or receiver_id not in bboxes:
+                continue
+            passer_coords = closest_coords(event["start_time"]+1, bboxes[passer_id])
+            receiver_coords = closest_coords(event["end_time"]-1, bboxes[receiver_id])
+            tags = classify_pass(event, passer_coords["team"], receiver_coords["team"], passer_coords["x"], passer_coords["y"], receiver_coords["x"], receiver_coords["y"], bboxes)
        
         # shots
         elif event_type == "shot":
@@ -37,8 +40,11 @@ def analyze_events(events, bboxes):
         
         # carries
         elif event_type == "carry":
-            start_coords = closest_coords(event["start_time"]+1, bboxes[event["participants"]["carrier"]])
-            end_coords = closest_coords(event["end_time"]-1, bboxes[event["participants"]["carrier"]])
+            carrier_id = event["participants"]["carrier"]
+            if carrier_id not in bboxes:
+                continue
+            start_coords = closest_coords(event["start_time"]+1, bboxes[carrier_id])
+            end_coords = closest_coords(event["end_time"]-1, bboxes[carrier_id])
             tags = classify_carry(event, start_coords["team"], start_coords["x"], start_coords["y"], end_coords["x"], end_coords["y"])
 
         # infractions
@@ -80,7 +86,7 @@ if __name__ == "__main__":
     db_conn = DBConnector(host, user, password, database)
 
     # fetch data
-    events, bboxes = fetch_match_event_data(db_conn, 4)
+    events, bboxes = fetch_match_event_data(db_conn, 6)
 
     # analyze and write events
     analyzed = analyze_events(events, bboxes)

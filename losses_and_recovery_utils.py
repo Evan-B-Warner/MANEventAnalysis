@@ -58,10 +58,12 @@ def classify_losses_and_interceptions(event, bboxes):
 
 def classify_recoveries(events, bboxes):
     recoveries = {}
+    event_ids = list(events)
+    events = list(events.values())
     for i in range(len(events)):
         event = events[i]
         if event["type"] in ["pass", "shot", "duel"]:
-            changed, new_team = possession_changed(event)
+            changed, new_team = possession_changed(event, bboxes)
             if changed and retained_possession(new_team, events[i+1:], bboxes):
-                recoveries[event["event_id"]] = "recovery"
+                recoveries[event_ids[i]] = "recovery"
     return recoveries

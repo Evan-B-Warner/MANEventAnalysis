@@ -53,7 +53,7 @@ def is_penalty_area_pass(passer_team, receiver_team, passer_x, passer_y, receive
 
 def get_last_man_x(event_time, passer_team, bboxes):
     # get the player with farthest x_coord from the defending team
-    min_x, max_x = None, None
+    min_x, max_x = 2, -1
     for tracker_id in bboxes:
         current_bboxes = bboxes[tracker_id]
         if current_bboxes[0]["timestamp"] > event_time or current_bboxes[-1]["timestamp"] < event_time:
@@ -95,6 +95,6 @@ def classify_pass(event, passer_team, receiver_team, passer_x, passer_y, receive
         tags.append("final_third_pass")
     if is_penalty_area_pass(passer_team, receiver_team,passer_x, passer_y, receiver_x, receiver_y):
         tags.append("penalty_area_pass")
-    if is_through_pass(event, passer_team, bboxes):
+    if is_through_pass(event, passer_team, bboxes, passer_x, receiver_x):
         tags.append("through_pass")
     return tags

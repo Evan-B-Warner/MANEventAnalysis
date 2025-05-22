@@ -22,6 +22,8 @@ def cartesian_distance(x1, y1, x2, y2):
 
 def closest_coords(timestamp, coords):
     # finds the player coordinates at the closest time to the timestamp
+    if len(coords) == 0:
+        return {"timestamp": -1, "x": 0, "y": 0, "team": 0}
     prev = None
     for i in range(len(coords)):
         coord = coords[i]
